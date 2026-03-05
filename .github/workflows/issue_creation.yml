@@ -1,0 +1,34 @@
+name: Create Monday.com Issue
+
+on:
+  repository_dispatch:
+    types: [monday_issue]
+  workflow_dispatch:
+    inputs:
+      title:
+        description: 'Issue Title'
+        required: true
+      body:
+        description: 'Issue Description'
+        required: true
+
+jobs:
+  create_issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub Issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.client_payload?.title || context.payload.inputs?.title;
+            const body = context.payload.client_payload?.body || context.payload.inputs?.body;
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              // Adding the 'copilot' label is the standard way to trigger 
+              // Copilot Workspace or specific automation bots.
+              labels: ['copilot', 'monday-integration']
+            });
